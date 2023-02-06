@@ -112,7 +112,8 @@ func decodeInteger(r *bufio.Reader) (Typ, error) {
 //Array
 func decodeArray(r *bufio.Reader) (Typ, error) {
 	line, err := readLine(r)
-	fmt.Println("decodeArray", string(line))
+
+	//fmt.Println("decodeArray", string(line))
 	if err != nil {
 		return Typ{}, nil
 	}
@@ -146,7 +147,6 @@ func decodeStream(r *bufio.Reader) (Typ, error) {
 		return Typ{}, err
 	}
 
-	fmt.Println("resp type", string(respType))
 	switch respType {
 	case BULK:
 		return decodeBulk(r)

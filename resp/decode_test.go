@@ -33,10 +33,10 @@ func Test_decodeStream(t *testing.T) {
 
 	input := []byte(
 		"*4\r\n" +
-		"$5\r\nHELLO\r\n" +
-		"$5\r\nWORLD\r\n" +
-		"$-1\r\n" +
-		":10\r\n")
+			"$5\r\nHELLO\r\n" +
+			"$5\r\nWORLD\r\n" +
+			"$-1\r\n" +
+			":10\r\n")
 	buf := bytes.NewBuffer(input)
 	reader := bufio.NewReader(buf)
 

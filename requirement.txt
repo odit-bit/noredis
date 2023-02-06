@@ -1,11 +1,13 @@
+component
+1.serializer 
+    * resp protocol
 
-user ==string==> lib/client ==resp==> lib/server ==cmd==> cache ==data-type==> lib/server ==resp==> lib/client ==data-type==> user  
-example:
-user 		= "Set comment cilailai" -> 
-lib/client 	= []byte("*3\r\n" + "$3\r\nSET\r\n" + "$7\r\ncomment\r\n" + "$8\r\ncilailai\r\n ->
-lib/server	= ["Set" "comment" "cilailai"] ->
-cache		= func Set(key "comment", value "cilailai") return success as "ok" string ->
-lib/server	= []byte("+ok\r\n") ->
-lib/client	= "ok" ->
-user		= for user process
+2.storage
+    * key value storage
 
+3.network
+    * tcp
+
+
+command logic
+ incoming connection -> Tcp -> serializer -> storage

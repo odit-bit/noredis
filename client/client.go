@@ -22,8 +22,8 @@ func main() {
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	checkErr(err)
 
-	//defer conn.Close()
 	scanner := bufio.NewScanner(os.Stdin)
+
 	for {
 		//get input from user
 		scanner.Scan()
@@ -37,12 +37,8 @@ func main() {
 		_, err = conn.Write(encodeMsg)
 		checkErr(err)
 
-		//read response from servers
-		buf := make([]byte, 1024)
-		_, err := conn.Read(buf)
-		fmt.Println("error read ", err)
-		fmt.Println("response ->", string(buf))
-		//fmt.Println(readResponse(reader))
+		reader := bufio.NewReader(conn)
+		fmt.Println(readResponse(reader))
 	}
 
 	//close the connection
@@ -55,7 +51,12 @@ func readResponse(reader *bufio.Reader) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	str := ""
+	if len(response.Array()) < 1 {
+		return response.String(), nil
+	}
+
 	for _, v := range response.Array() {
 		str += v.String() + " "
 		fmt.Println("read Response ", v.String())
