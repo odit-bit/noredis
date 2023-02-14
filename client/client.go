@@ -3,11 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
 
-	"github.com/odit-bit/noredis/resp"
+	"github.com/odit-bit/proto/resp"
 )
 
 func main() {
@@ -46,8 +47,8 @@ func main() {
 
 }
 
-func readResponse(reader *bufio.Reader) (string, error) {
-	response, err := resp.DecodeResp(reader)
+func readResponse(reader io.Reader) (string, error) {
+	response, err := resp.Decode(reader)
 	if err != nil {
 		return "", err
 	}

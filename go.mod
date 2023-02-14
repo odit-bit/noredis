@@ -2,7 +2,10 @@ module github.com/odit-bit/noredis
 
 go 1.18
 
-require github.com/stretchr/testify v1.8.1
+require (
+	github.com/odit-bit/proto v0.0.0-20230214163102-e3082058dd56
+	github.com/stretchr/testify v1.8.1
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

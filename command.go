@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/odit-bit/noredis/db"
-	"github.com/odit-bit/noredis/resp"
+	"github.com/odit-bit/proto/resp"
 )
 
 //Command will handling resp.typ into appropriate command
@@ -23,7 +23,7 @@ func (cmd *Command) HandleCache(conn net.Conn) {
 	defer conn.Close()
 	for {
 		//DecodeResp return valid resp-type
-		respType, err := resp.DecodeResp(bufio.NewReader(conn))
+		respType, err := resp.Decode(bufio.NewReader(conn))
 		if err != nil {
 			_, err := conn.Write(resp.EncodeErr(err))
 			fmt.Println("[DEBUG]DecodeResp", err)
@@ -91,7 +91,7 @@ func (cmd *Command) Set(args []resp.Typ) ([]byte, error) {
 	return resp.Encode("OK"), nil
 }
 
-//Ping handler
+// Ping handler
 func pingCommand(args []resp.Typ) []byte {
 	if len(args) == 0 {
 		response := resp.EncodeSimple("PONG")
@@ -103,7 +103,7 @@ func pingCommand(args []resp.Typ) []byte {
 	return response
 }
 
-//Echo command
+// Echo command
 func echoCommand(args []resp.Typ) []byte {
 	//no argument
 	if len(args) == 0 {
