@@ -25,6 +25,7 @@ func (f HandlerFunc) Exe(req *Request, res *Response) {
 type Server struct {
 	Addr    string
 	Handler Handler
+	AuthF   func(string) bool
 }
 
 func (srv *Server) Serve(l net.Listener) error {
@@ -63,12 +64,16 @@ func (sh serverHandler) Exe(req *Request, res *Response) {
 
 // =============Response=============
 
+// represent requested Response
 type Response struct {
 	conn *conn
 	req  *Request
 	w    io.Writer
 }
 
+// Write write a to response writer,
+// it wiil do encode before writing and
+// according to type it will return error if type not allowed
 func (res *Response) Write(a any) error {
 	_, err := res.w.Write(resp.Pack(a))
 	return err
@@ -94,6 +99,7 @@ func newConn(srv *Server, rwc io.ReadWriteCloser) *conn {
 	return &c
 }
 
+// readRequest will create response struct from connection
 func (c *conn) readRequest() (*Response, error) {
 	req, err := readRequest(c.bufR)
 	if err != nil {
@@ -109,11 +115,41 @@ func (c *conn) readRequest() (*Response, error) {
 	return res, nil
 }
 
+// to authenctication the connection for the first time accepted by listener
+// if server auth handler is nill return nill
+func (c *conn) authentication() error {
+	if c.srv.AuthF != nil {
+		res, err := c.readRequest()
+		if err != nil {
+			return err
+		}
+		if res.req.CmdName != "AUTH" {
+			err := fmt.Errorf("AUTH need authorized")
+			res.Write(err)
+			return err
+		}
+
+		pass := res.req.Args[0].(string)
+		if ok := c.srv.AuthF(pass); !ok {
+			err := fmt.Errorf("wrong password")
+			res.Write(err)
+			return err
+		}
+		res.Write("ok")
+	}
+	return nil
+}
+
+// serve the connection after successfully authorized
 func (c *conn) serve() {
 	defer func() {
 		err := c.closer.Close()
 		log.Println("conn close", err)
 	}()
+
+	if err := c.authentication(); err != nil {
+		return
+	}
 	for {
 		res, err := c.readRequest()
 		if err != nil {
@@ -134,6 +170,7 @@ type Request struct {
 	Args    []any
 }
 
+// parse incoming connection as Request
 func readRequest(r *bufio.Reader) (*Request, error) {
 	args, err := unpackCommand(r)
 	if err != nil {
@@ -147,6 +184,7 @@ func readRequest(r *bufio.Reader) (*Request, error) {
 	return req, nil
 }
 
+// unpack command's paramater(args) from connection buffer
 func unpackCommand(r io.ByteReader) ([]any, error) {
 	var args []any
 	unpacked, err := resp.Unpack(r)

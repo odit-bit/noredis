@@ -9,15 +9,14 @@ import (
 
 func main() {
 
-	//when server recieve incoming connection from socket (tcp)
-	// it will create conn object that cann read(parse) the command from client and write(reply)to that connection
-
 	storage := db.InitStorage()
 	cmd := noredis.NewCommand(storage)
 
+	// server
 	srv := noredis.Server{
 		Addr:    ":8745",
 		Handler: loggerMiddleware(log.Println, cmd),
+		AuthF:   Auth,
 	}
 	if err := srv.ListenAndServe(); err != nil {
 		log.Println(err)
@@ -30,4 +29,8 @@ func loggerMiddleware(logger func(a ...any), next noredis.Handler) noredis.Handl
 		logger(req.CmdName)
 		next.Exe(req, res)
 	})
+}
+
+func Auth(pass string) bool {
+	return pass == "hire_me!!"
 }

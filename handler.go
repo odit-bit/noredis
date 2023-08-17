@@ -10,9 +10,7 @@ type Command struct {
 }
 
 func NewCommand(db Storage) *Command {
-	// http.Server
 	cmd := &Command{
-		// conn:    conn,
 		storage: db,
 	}
 	return cmd
@@ -24,7 +22,6 @@ func (cmd *Command) Exe(req *Request, res *Response) {
 
 	switch req.CmdName {
 	case "SET":
-		// cmd.storage.Add(req.Args[0].(string), req.Args[1])
 		result, err = cmd.set(req, res)
 
 	case "GET":

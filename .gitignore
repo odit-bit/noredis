@@ -23,6 +23,7 @@ go.work
 
 # Custom
 #development directory
+bin/
 xxx/
 tools/
 requirement.*

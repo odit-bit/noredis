@@ -10,9 +10,14 @@ import (
 )
 
 func main() {
-	conn, err := net.Dial("tcp", ":8745")
+	addr := ":8745"
+
+	conn, err := net.Dial("tcp", addr)
+
 	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
@@ -21,8 +26,6 @@ func main() {
 	}
 
 	res, err := cmd.Set("22a10", "hello world", 10000)
-	// rw.Write(b)
-	// rw.Flush()
 	fmt.Println(res)
 
 }

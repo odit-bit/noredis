@@ -13,10 +13,16 @@ import (
 )
 
 func main() {
-	conn, err := net.Dial("tcp", ":8745")
+	addr := "103-181-183-201.nevacloud.io:8745"
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		log.Fatal(err)
+		addr := ":8745"
+		conn, err = net.Dial("tcp", addr)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	buf := make([]byte, 1024)
 	scanner := bufio.NewScanner(os.Stdin)
