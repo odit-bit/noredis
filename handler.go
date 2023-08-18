@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// implement server handler
+
 // // handler is wired all the commponent
 type Command struct {
 	storage Storage
@@ -48,6 +50,9 @@ func (cmd *Command) Exe(req *Request, res *Response) {
 
 func (cmd *Command) set(req *Request, res *Response) (any, error) {
 	args := req.Args
+	if len(args) < 2 {
+		return nil, fmt.Errorf("SYNTAX SET key value")
+	}
 	var opt Setoptions
 	if len(args) > 2 {
 		err := opt.fromArgs(args[2:])

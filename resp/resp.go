@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+//encode/decode resp protocol
+
 const _CRLF string = "\r\n"
 const _BLOB string = "$"
 const _SIMPLE string = "+"

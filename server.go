@@ -6,9 +6,13 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 
 	"github.com/odit-bit/noredis/resp"
 )
+
+//noredis server implementation
+//included network layer
 
 type Handler interface {
 	Exe(req *Request, res *Response)
@@ -23,9 +27,10 @@ func (f HandlerFunc) Exe(req *Request, res *Response) {
 // ============Server============
 
 type Server struct {
-	Addr    string
-	Handler Handler
-	AuthF   func(string) bool
+	Addr        string
+	Handler     Handler
+	AuthF       func(string) bool
+	IdleTimeout time.Duration
 }
 
 func (srv *Server) Serve(l net.Listener) error {
@@ -36,20 +41,21 @@ func (srv *Server) Serve(l net.Listener) error {
 		}
 
 		conn := newConn(srv, c)
-		conn.serve()
+		go conn.serve()
 	}
 }
 
 func (srv *Server) ListenAndServe() error {
 	if srv.Addr == "" {
-		srv.Addr = ":8745"
+		srv.Addr = "8745"
 	}
-	l, err := net.Listen("tcp", srv.Addr)
+	addr := ":" + srv.Addr
+	l, err := net.Listen("tcp", addr)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	fmt.Println("run on port", srv.Addr)
 	return srv.Serve(l)
 }
 
@@ -95,7 +101,6 @@ func newConn(srv *Server, rwc io.ReadWriteCloser) *conn {
 		bufR:   bufio.NewReader(rwc),
 		w:      rwc,
 	}
-
 	return &c
 }
 

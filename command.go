@@ -4,6 +4,8 @@ import (
 	"errors"
 )
 
+// defined noredis command function, to use noredis
+
 type Storage interface {
 	Add(key string, value any)
 	LookupRead(key string) (any, bool)

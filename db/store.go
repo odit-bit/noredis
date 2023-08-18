@@ -2,10 +2,12 @@ package db
 
 import "github.com/odit-bit/noredis"
 
-type Storage interface {
-	Add(key string, value any)
-	LookupRead(key string) (any, bool)
-}
+//implement noredis storage
+
+// type Storage interface {
+// 	Add(key string, value any)
+// 	LookupRead(key string) (any, bool)
+// }
 
 //==================DB================
 

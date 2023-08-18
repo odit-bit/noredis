@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 
@@ -13,29 +14,65 @@ import (
 )
 
 func main() {
-	addr := "103-181-183-201.nevacloud.io:8745"
+	env := os.Args[1]
+	var addr string
+	switch env {
+	case "local":
+		addr = ":8745"
+	case "remote":
+		addr = "103-181-183-201.nevacloud.io:8745"
+	default:
+		addr = env
+	}
+
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		addr := ":8745"
-		conn, err = net.Dial("tcp", addr)
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Fatal(err)
 	}
+	fmt.Println("connect to address :", addr)
 
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	buf := make([]byte, 1024)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		args := scanner.Text()
-		cmd := strings.Split(args, " ")
-		rw.Writer.Write(AsCommand(cmd))
-		rw.Flush()
 
-		n, _ := rw.Reader.Read(buf[0:])
-		fmt.Println(">>", string(buf[:n]))
+	done := make(chan struct{})
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+
+	// read Op
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			default:
+				n, err := rw.Reader.Read(buf[0:])
+				if err != nil {
+					// log.Println(err)
+					return
+				}
+				fmt.Println(">>", string(buf[:n]))
+			}
+			// break
+		}
+	}()
+
+	//write op
+	for scanner.Scan() {
+		select {
+		case <-sig:
+			close(done)
+			conn.Close()
+			return
+		default:
+			args := scanner.Text()
+			cmd := strings.Split(args, " ")
+			rw.Writer.Write(AsCommand(cmd))
+			rw.Flush()
+		}
 	}
+
 }
 
 func AsCommand(args []string) []byte {

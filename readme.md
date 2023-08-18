@@ -2,15 +2,15 @@ WIP project
 
 folder structure
 
--/ (root)
+(root)
     logic of noredis server to manage connection, parsing, and etc...
--/app 
+/app 
     entry point of application
--/client (not implemented)
+/client (not implemented)
     client API
--/db
+/db
     implementation of redis data store, with go map as datastructure
--/resp 
+/resp 
     implementation of RESP protocol.
 
 motivation of this project is to develop understanding of the redis app design internals.
