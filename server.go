@@ -155,13 +155,15 @@ func (c *conn) serve() {
 	if err := c.authentication(); err != nil {
 		return
 	}
+
+	h := serverHandler{c.srv}
 	for {
 		res, err := c.readRequest()
 		if err != nil {
 			log.Println(err)
 			break
 		}
-		serverHandler{c.srv}.Exe(res.req, res)
+		h.Exe(res.req, res)
 	}
 
 }

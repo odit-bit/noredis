@@ -58,6 +58,8 @@ func Unpack(r io.ByteReader) (any, error) {
 		ele, err = DecodeBLOB(r)
 	case '*':
 		ele, err = DecodeArray(r)
+	case '-':
+		ele, err = DecodeError(r)
 	default:
 		err = fmt.Errorf("illegal type")
 	}
@@ -66,6 +68,11 @@ func Unpack(r io.ByteReader) (any, error) {
 		return nil, err
 	}
 	return ele, nil
+}
+
+func DecodeError(r io.ByteReader) (any, error) {
+	b, err := readCrlf(r)
+	return string(b), err
 }
 
 func DecodeSimple(r io.ByteReader) (string, error) {

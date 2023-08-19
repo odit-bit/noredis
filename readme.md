@@ -22,4 +22,5 @@ SET - (no options)
 GET - (no options)
 INCR
 
-to use the app , it can build from app/server directory.
+to try locally , it can run from app/server directory.
+`go run ./app/server -port {port} -pass {password}`

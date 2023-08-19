@@ -52,15 +52,14 @@ func loggerMiddleware(logger func(a ...any), next noredis.Handler) noredis.Handl
 	})
 }
 
-func Auth(pass string) bool {
-	return pass == "hire_me!!"
-}
-
 func monitorMiddleWare(memStat *runtime.MemStats, after noredis.Handler) noredis.HandlerFunc {
+
 	return noredis.HandlerFunc(func(req *noredis.Request, res *noredis.Response) {
 		after.Exe(req, res)
 		runtime.ReadMemStats(memStat)
 		mb := memStat.Alloc / 1000
+		freed := memStat.Frees
 		fmt.Println("memory use:", mb, "mb")
+		fmt.Println("memory freed:", freed)
 	})
 }

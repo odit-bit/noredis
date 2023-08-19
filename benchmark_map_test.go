@@ -50,3 +50,27 @@ func Benchmark_bytes_map(b *testing.B) {
 	}
 
 }
+
+func Benchmark_Alloc(b *testing.B) {
+	type req struct {
+		cmd  string
+		args []any
+	}
+
+	rq := func() *req {
+		r := req{
+			cmd:  "SET",
+			args: []any{"as", 1, 2, "dwdwd"},
+		}
+		return &r
+	}
+
+	var request req
+
+	for i := 0; i < b.N; i++ {
+		result := rq()
+		request = *result
+	}
+
+	_ = request
+}
