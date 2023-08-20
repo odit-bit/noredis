@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/odit-bit/noredis/resp"
@@ -31,18 +33,39 @@ type Server struct {
 	Handler     Handler
 	AuthF       func(string) bool
 	IdleTimeout time.Duration
+	rwc         []*conn
 }
 
 func (srv *Server) Serve(l net.Listener) error {
-	for {
-		c, err := l.Accept()
-		if err != nil {
-			log.Fatal(err)
-		}
 
-		conn := newConn(srv, c)
-		go conn.serve()
+	go func() {
+		for {
+			c, err := l.Accept()
+			if err != nil {
+				break
+			}
+			conn := newConn(srv, c)
+			srv.rwc = append(srv.rwc, conn)
+			go conn.serve()
+		}
+	}()
+
+	// TODO: proper shutdown
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+
+	<-sig
+	err := l.Close()
+	if err != nil {
+		log.Println(err)
 	}
+
+	for _, c := range srv.rwc {
+		c.closer.Close()
+	}
+
+	return fmt.Errorf("server is shutdown")
+
 }
 
 func (srv *Server) ListenAndServe() error {
@@ -121,7 +144,6 @@ func (c *conn) readRequest() (*Response, error) {
 }
 
 // to authenctication the connection for the first time accepted by listener
-// if server auth handler is nill return nill
 func (c *conn) authentication() error {
 	if c.srv.AuthF != nil {
 		res, err := c.readRequest()
@@ -148,8 +170,8 @@ func (c *conn) authentication() error {
 // serve the connection after successfully authorized
 func (c *conn) serve() {
 	defer func() {
-		err := c.closer.Close()
-		log.Println("conn close", err)
+		c.closer.Close()
+		log.Println("conn close:")
 	}()
 
 	if err := c.authentication(); err != nil {
@@ -160,7 +182,7 @@ func (c *conn) serve() {
 	for {
 		res, err := c.readRequest()
 		if err != nil {
-			log.Println(err)
+			log.Println("conn read request error:")
 			break
 		}
 		h.Exe(res.req, res)

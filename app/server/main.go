@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"runtime"
 
 	"github.com/odit-bit/noredis"
@@ -13,30 +12,34 @@ import (
 
 func main() {
 
-	if len(os.Args) != 5 {
-		fmt.Println("for start using flag: ' -port port -pass password'")
-		return
-	}
-
-	port := flag.String("port", "8745", "port for nr server")
-	password := flag.String("pass", "", "password to connect nr server")
-	// Parse command-line arguments
+	//read flag
+	var confPath, port, password string
+	flag.StringVar(&confPath, "conf", "", "config file path")
+	flag.StringVar(&port, "port", "", "port number")
+	flag.StringVar(&password, "password", "", "nr-server password")
 	flag.Parse()
+
+	if confPath != "" {
+		config := ReadConfig(confPath)
+		port = config["PORT"]
+		password = config["PASSWORD"]
+		config = nil
+	}
 
 	//authentication handler
 	authFunc := func(pass string) bool {
-		return pass == *password
+		return pass == password
 	}
 
 	// db setup
 	storage := db.InitStorage()
 	cmd := noredis.NewCommand(storage)
 
-	memStat := runtime.MemStats{}
+	// memStat := runtime.MemStats{}
 	// server
 	srv := noredis.Server{
-		Addr:    *port,
-		Handler: monitorMiddleWare(&memStat, loggerMiddleware(log.Println, cmd)),
+		Addr:    port,
+		Handler: cmd,
 		AuthF:   authFunc,
 	}
 	if err := srv.ListenAndServe(); err != nil {
