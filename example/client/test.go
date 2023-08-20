@@ -15,18 +15,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = cli.Set("odit", "ganteng")
+	err = cli.Set("22a10", "hellow")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	result, err := cli.Get("odit")
+	result, err := cli.Get("22a10")
 	fmt.Println(result, err)
 
-	cli.Set("odit", 1)
+	cli.Set("22a10", 1)
 	now := time.Now()
-	for i := 0; i < 1000000; i++ {
-		_, err := cli.Incr("odit")
+	for i := 0; i < 1000; i++ {
+		_, err := cli.Incr("22a10")
 		if err != nil {
 			log.Println("incr error:", err)
 			break

@@ -171,7 +171,7 @@ func (c *conn) authentication() error {
 func (c *conn) serve() {
 	defer func() {
 		c.closer.Close()
-		log.Println("conn close:")
+		// log.Println("conn close:")
 	}()
 
 	if err := c.authentication(); err != nil {
@@ -182,7 +182,7 @@ func (c *conn) serve() {
 	for {
 		res, err := c.readRequest()
 		if err != nil {
-			log.Println("conn read request error:")
+			// log.Println("conn read request error:")
 			break
 		}
 		h.Exe(res.req, res)
@@ -193,7 +193,6 @@ func (c *conn) serve() {
 //==============REQUEST============
 
 // represent client request command
-
 type Request struct {
 	CmdName string
 	Args    []any
